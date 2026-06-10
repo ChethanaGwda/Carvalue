@@ -1,12 +1,18 @@
-# 🚗 CarValue – AI Powered Used Car Price Prediction System
+#  CarValue – Car Price Prediction System
 
 CarValue is a Machine Learning based web application that predicts the resale value of used cars using vehicle details such as manufacturing year, fuel type, transmission, ownership history, and kilometers driven.
 
-The application also provides a seller dashboard, trending car insights, and an interactive user experience for both buyers and sellers.
+The application provides secure user authentication, a buyer and seller dashboard, trending car insights, and an interactive experience for users looking to buy, sell, or evaluate vehicles.
 
 ---
 
 ## ✨ Features
+
+### 🔐 Authentication Module
+- Secure login page with Google Sign-In interface
+- User-friendly onboarding experience
+- Protected access to CarValue dashboard
+- Smooth authentication workflow before accessing the platform
 
 ### 👨‍💼 Buyer Module
 - Predict used car market value instantly
@@ -26,6 +32,12 @@ The application also provides a seller dashboard, trending car insights, and an 
 - Trending car sales information
 - Market insights for buyers and sellers
 
+### 🚗 Trending Cars Section
+- Top-selling cars in the market
+- Vehicle specifications and highlights
+- Monthly sales insights
+- Market trend visualization
+
 ---
 
 ## 🛠️ Tech Stack
@@ -44,6 +56,10 @@ The application also provides a seller dashboard, trending car insights, and an 
 - Random Forest Regressor
 - Pandas
 - NumPy
+
+### Authentication
+- Google Sign-In UI
+- Session-Based Navigation
 
 ### Tools
 - VS Code
@@ -66,6 +82,7 @@ CarValue/
 │   └── cars.csv
 │
 ├── frontend/
+│   ├── auth.html
 │   ├── index.html
 │   ├── style.css
 │   └── images/
@@ -76,49 +93,15 @@ CarValue/
 
 ---
 
-## 🚀 Installation
 
-### Clone Repository
+## 🔄 Application Workflow
 
-```bash
-git clone https://github.com/yourusername/CarValue.git
-cd CarValue
-```
-
-### Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### Run Backend
-
-```bash
-cd backend
-python main.py
-```
-
-Backend runs on:
-
-```text
-http://127.0.0.1:5000
-```
-
-### Run Frontend
-
-Open:
-
-```text
-frontend/index.html
-```
-
-or
-
-```bash
-cd frontend
-python -m http.server 5500
-```
-
+1. User opens the Authentication Page.
+2. User clicks Continue with Google.
+3. User is redirected to the CarValue Dashboard.
+4. Buyer or Seller selects their preferred module.
+5. Machine Learning model analyzes vehicle details.
+6. Predicted market value and insights are displayed instantly.
 
 ---
 
@@ -126,7 +109,7 @@ python -m http.server 5500
 
 The prediction model is trained using a Random Forest Regressor on historical used-car sales data.
 
-Input Features:
+### Input Features
 
 - Manufacturing Year
 - Kilometers Driven
@@ -135,20 +118,15 @@ Input Features:
 - Seller Type
 - Ownership
 
-Output:
+### Output
 
 - Predicted Market Value
 - Fair Price Range
 - Recommended Selling Price
+- Value Factor Analysis
 
 
 
-## 🎯 Future Enhancements
+---
 
-- User Authentication
-- Cloud Deployment
-- Vehicle Image Analysis
-- AI-based Price Recommendation
-- Real-Time Market Data Integration
-- Car Comparison Engine
-
+useful, consider giving it a star.
