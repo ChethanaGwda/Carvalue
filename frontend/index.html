@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarValue — Used Car Price Estimator</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0f14;--surface:#161921;--card:#1c2030;--border:#2a2f42;
+  --accent:#e8ff47;--accent2:#4affb4;--text:#f0f2ff;--muted:#6b7194;
+  --seller:#ff6f3c;--seller2:#ffb347;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+nav{display:flex;align-items:center;justify-content:space-between;padding:18px 40px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;background:rgba(13,15,20,0.92);backdrop-filter:blur(14px)}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:22px;letter-spacing:-0.5px}
+.logo span{color:var(--accent)}
+nav ul{list-style:none;display:flex;gap:28px}
+nav a{color:var(--muted);text-decoration:none;font-size:14px;transition:color .2s}
+nav a:hover{color:var(--text)}
+.nav-cta{background:var(--accent);color:#0d0f14;padding:8px 20px;border-radius:8px;font-weight:600;font-size:14px;text-decoration:none}
+.mode-bar{display:flex;justify-content:center;padding:28px 40px 0;gap:12px}
+.mode-tab{padding:12px 40px;border-radius:12px;border:1.5px solid var(--border);font-family:'Syne',sans-serif;font-weight:700;font-size:15px;cursor:pointer;transition:all .25s;background:var(--surface);color:var(--muted)}
+.mode-tab.buyer-tab.active{background:var(--accent);color:#0d0f14;border-color:var(--accent);box-shadow:0 0 24px rgba(232,255,71,.25)}
+.mode-tab.seller-tab.active{background:linear-gradient(135deg,var(--seller),var(--seller2));color:#fff;border-color:var(--seller);box-shadow:0 0 24px rgba(255,111,60,.3)}
+.buyer-page,.seller-page{display:none}
+.buyer-page.active,.seller-page.active{display:block}
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;padding:60px 40px;max-width:1200px;margin:0 auto}
+.hero-left h1{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(34px,4.5vw,56px);line-height:1.06;letter-spacing:-1px;margin-bottom:18px}
+.hero-left h1 em{color:var(--accent);font-style:normal}
+.hero-left h1 em.seller-em{color:var(--seller)}
+.hero-left p{color:var(--muted);font-size:15px;line-height:1.75;max-width:420px}
+.hero-stats{display:flex;gap:28px;margin-top:32px}
+.stat-val{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;color:var(--accent2)}
+.stat-val.seller-stat{color:var(--seller)}
+.stat-lbl{font-size:12px;color:var(--muted);margin-top:2px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:34px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.card.seller-card::before{background:linear-gradient(90deg,var(--seller),var(--seller2))}
+.card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:17px;margin-bottom:26px;display:flex;align-items:center;gap:10px}
+.card-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+label{font-size:11px;color:var(--muted);letter-spacing:.6px;text-transform:uppercase}
+select,input[type="number"],input[type="text"]{background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:11px 14px;outline:none;transition:border-color .2s;appearance:none;-webkit-appearance:none;width:100%}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7194' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;cursor:pointer}
+select:focus,input:focus{border-color:var(--accent)}
+.seller-page select:focus,.seller-page input:focus{border-color:var(--seller)}
+select option{background:#1c2030}
+textarea{background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:11px 14px;outline:none;width:100%;resize:vertical;min-height:80px;transition:border-color .2s}
+textarea:focus{border-color:var(--seller)}
+.km-display{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.km-val{font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--accent)}
+.km-val.seller-km{color:var(--seller)}
+input[type="range"]{padding:0;height:6px;border-radius:3px;cursor:pointer;width:100%;background:linear-gradient(90deg,var(--accent) var(--pct,10%),var(--border) var(--pct,10%));border:none;outline:none;appearance:none;-webkit-appearance:none}
+.seller-page input[type="range"]{background:linear-gradient(90deg,var(--seller) var(--pct2,10%),var(--border) var(--pct2,10%))}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--bg)}
+.seller-page input[type="range"]::-webkit-slider-thumb{background:var(--seller)}
+.chip-group{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:8px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;transition:all .2s;background:var(--surface);color:var(--muted)}
+.chip.active{border-color:var(--accent);color:var(--accent);background:rgba(232,255,71,.08)}
+.seller-page .chip.active{border-color:var(--seller);color:var(--seller);background:rgba(255,111,60,.08)}
+.submit-btn{width:100%;margin-top:22px;padding:15px;border:none;border-radius:12px;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:16px;transition:all .2s;position:relative;overflow:hidden}
+.submit-btn.buyer-btn{background:var(--accent);color:#0d0f14}
+.submit-btn.seller-btn{background:linear-gradient(135deg,var(--seller),var(--seller2));color:#fff}
+.submit-btn:hover{opacity:.9;transform:translateY(-1px)}
+.submit-btn.loading{pointer-events:none}
+.submit-btn .btn-text{transition:opacity .2s}
+.submit-btn.loading .btn-text{opacity:0}
+.spinner{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:20px;height:20px;border:2px solid rgba(0,0,0,.2);border-top-color:#0d0f14;border-radius:50%;animation:spin .7s linear infinite;display:none}
+.submit-btn.loading .spinner{display:block}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.error-box{background:rgba(255,80,80,.1);border:1px solid rgba(255,80,80,.3);border-radius:10px;padding:12px 16px;margin-top:14px;font-size:13px;color:#ff6b6b;display:none}
+.error-box.show{display:block}
+.result-section{max-width:1200px;margin:0 auto 70px;padding:0 40px;display:none}
+.result-section.show{display:block;animation:fadeUp .4s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.result-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:18px}
+.price-card{background:linear-gradient(135deg,#1c2030 0%,#1a2535 100%);border:1px solid var(--accent);border-radius:20px;padding:34px;position:relative;overflow:hidden}
+.price-card::after{content:'';position:absolute;bottom:-40px;right:-40px;width:160px;height:160px;background:radial-gradient(circle,rgba(232,255,71,.1) 0%,transparent 70%)}
+.price-label{font-size:11px;color:var(--muted);letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px}
+.price-main{font-family:'Syne',sans-serif;font-size:50px;font-weight:800;color:var(--accent);line-height:1}
+.price-range{display:flex;gap:20px;margin-top:18px;padding-top:18px;border-top:1px solid var(--border)}
+.range-item small{font-size:11px;color:var(--muted);display:block;margin-bottom:4px}
+.range-item.low strong{font-size:15px;color:#ff6b6b}
+.range-item.high strong{font-size:15px;color:var(--accent2)}
+.range-divider{flex:1;display:flex;align-items:center}
+.range-line{width:100%;height:3px;background:linear-gradient(90deg,#ff6b6b,var(--accent),var(--accent2));border-radius:3px}
+.price-note{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.6}
+.detail-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:22px}
+.detail-card h3{font-family:'Syne',sans-serif;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px}
+.detail-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+.detail-row:last-child{border:none}
+.detail-row span:first-child{font-size:13px;color:var(--muted)}
+.detail-row span:last-child{font-size:13px;font-weight:500}
+.meter-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:22px}
+.meter-card h3{font-family:'Syne',sans-serif;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:18px}
+.bar-item{margin-bottom:14px}
+.bar-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px}
+.bar-label span:last-child{color:var(--accent2);font-weight:500}
+.bar-track{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width .9s cubic-bezier(.4,0,.2,1);width:0%}
+
+/* SELLER */
+.seller-dash{max-width:1200px;margin:0 auto;padding:50px 40px}
+.seller-hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:start;margin-bottom:50px}
+.seller-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:40px}
+.step-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;position:relative}
+.step-card::before{content:attr(data-n);position:absolute;top:16px;right:16px;font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:var(--border);line-height:1}
+.step-card h3{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:8px;color:var(--seller)}
+.step-card p{font-size:13px;color:var(--muted);line-height:1.6}
+.upload-zone{border:2px dashed var(--border);border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:border-color .2s;background:var(--surface)}
+.upload-zone:hover{border-color:var(--seller)}
+.upload-zone p{color:var(--muted);font-size:13px;margin-top:8px}
+.price-estimate-badge{background:linear-gradient(135deg,rgba(255,111,60,.15),rgba(255,179,71,.1));border:1px solid var(--seller);border-radius:16px;padding:24px;margin-top:20px;text-align:center}
+.price-estimate-badge .est-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.price-estimate-badge .est-price{font-family:'Syne',sans-serif;font-size:38px;font-weight:800;color:var(--seller)}
+.price-estimate-badge .est-note{font-size:12px;color:var(--muted);margin-top:6px}
+.seller-result-section{display:none;animation:fadeUp .4s ease}
+.seller-result-section.show{display:block}
+
+/* TRENDING */
+.trending-section{max-width:1200px;margin:0 auto 80px;padding:0 40px}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.section-title{font-family:'Syne',sans-serif;font-size:24px;font-weight:700}
+.section-badge{background:rgba(232,255,71,.1);border:1px solid var(--accent);color:var(--accent);border-radius:20px;padding:4px 14px;font-size:12px;font-weight:600}
+.trending-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+
+/* REAL IMAGE CARD */
+.trend-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:all .25s}
+.trend-card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 12px 32px rgba(232,255,71,.1)}
+.trend-card.selected{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.trend-img-wrap{position:relative;width:100%;aspect-ratio:16/10;overflow:hidden;background:var(--surface)}
+.trend-img-wrap img{width:100%;height:100%;object-fit:cover;transition:transform .35s ease;display:block}
+.trend-img-wrap .img-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:50px;background:var(--surface)}
+.trend-card:hover .trend-img-wrap img{transform:scale(1.07)}
+.trend-rank{position:absolute;top:10px;left:10px;background:var(--accent);color:#0d0f14;font-family:'Syne',sans-serif;font-weight:800;font-size:11px;border-radius:6px;padding:3px 8px;z-index:2}
+.trend-units{position:absolute;bottom:8px;right:8px;background:rgba(13,15,20,.8);backdrop-filter:blur(6px);color:var(--accent2);font-size:11px;border-radius:6px;padding:3px 8px;z-index:2;font-weight:600}
+.trend-body{padding:14px}
+.trend-name{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:4px}
+.trend-price{font-size:13px;color:var(--accent2);margin-bottom:8px}
+.trend-meta{display:flex;gap:6px;flex-wrap:wrap}
+.trend-tag{background:var(--surface);border:1px solid var(--border);border-radius:5px;font-size:11px;color:var(--muted);padding:2px 8px}
+
+/* CAR DETAIL PANEL */
+.car-detail-panel{background:var(--card);border:1px solid var(--accent);border-radius:20px;overflow:hidden;margin-top:24px;display:none;animation:fadeUp .35s ease;position:relative}
+.car-detail-panel.show{display:block}
+.car-detail-hero{position:relative;width:100%;height:280px;overflow:hidden;background:var(--surface)}
+.car-detail-hero img{width:100%;height:100%;object-fit:cover;display:block}
+.car-detail-hero .img-fallback-big{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:100px;background:linear-gradient(135deg,var(--surface),var(--card))}
+.hero-gradient{position:absolute;bottom:0;left:0;right:0;height:120px;background:linear-gradient(transparent,var(--card))}
+.hero-info-overlay{position:absolute;bottom:20px;left:28px;right:80px}
+.hero-info-overlay h2{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;margin-bottom:6px;text-shadow:0 2px 8px rgba(0,0,0,.6)}
+.hero-info-overlay p{font-size:14px;color:var(--accent2)}
+.rank-badge-big{position:absolute;top:16px;left:16px;background:var(--accent);color:#0d0f14;font-family:'Syne',sans-serif;font-weight:800;font-size:13px;border-radius:8px;padding:5px 14px}
+.close-panel-btn{position:absolute;top:16px;right:16px;background:rgba(13,15,20,.7);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px;color:var(--muted);transition:all .2s;z-index:10}
+.close-panel-btn:hover{border-color:var(--accent);color:var(--accent)}
+.car-detail-body{padding:28px}
+.car-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.spec-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.spec-item .spec-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.spec-item .spec-val{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--text)}
+.car-highlights{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.highlight-tag{background:rgba(74,255,180,.08);border:1px solid rgba(74,255,180,.3);color:var(--accent2);border-radius:20px;font-size:12px;padding:4px 12px}
+.car-price-bar{display:flex;align-items:center;gap:20px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px}
+.cp-label{font-size:12px;color:var(--muted);margin-bottom:4px}
+.cp-val{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--accent)}
+.cp-used{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--accent2)}
+.divider-v{width:1px;height:44px;background:var(--border)}
+
+/* HOW */
+.how-section{max-width:1200px;margin:0 auto 80px;padding:0 40px}
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.how-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:26px}
+.how-num{font-family:'Syne',sans-serif;font-size:44px;font-weight:800;color:var(--border);line-height:1;margin-bottom:14px}
+.how-card h3{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:8px}
+.how-card p{font-size:14px;color:var(--muted);line-height:1.6}
+footer{border-top:1px solid var(--border);padding:28px 40px;display:flex;justify-content:space-between;align-items:center;max-width:1200px;margin:0 auto}
+footer p{font-size:13px;color:var(--muted)}
+
+@media(max-width:900px){
+  .hero,.seller-hero-grid,.car-detail-grid{grid-template-columns:1fr;gap:36px}
+  .result-grid{grid-template-columns:1fr}
+  .trending-grid{grid-template-columns:repeat(2,1fr)}
+  .how-grid,.seller-steps{grid-template-columns:1fr}
+  nav ul{display:none}
+}
+@media(max-width:600px){
+  nav,.hero,.trending-section,.how-section,.seller-dash,footer{padding-left:20px;padding-right:20px}
+  .result-section{padding:0 20px}
+  .form-grid{grid-template-columns:1fr}
+  .trending-grid{grid-template-columns:1fr}
+  .price-main{font-size:38px}
+  .hero{padding:36px 20px}
+  .mode-bar{padding:20px 20px 0}
+  .spec-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Car<span>Value</span></div>
+  <ul>
+    <li><a href="#">New Cars</a></li>
+    <li><a href="#">Used Cars</a></li>
+    <li><a href="#">Compare</a></li>
+    <li><a href="#">News</a></li>
+  </ul>
+  <a class="nav-cta" href="#">List Your Car</a>
+</nav>
+
+<div class="mode-bar">
+  <button class="mode-tab buyer-tab active" onclick="switchMode('buyer')"> I'm a Buyer</button>
+  <button class="mode-tab seller-tab" onclick="switchMode('seller')">I'm a Seller</button>
+</div>
+
+<!-- BUYER PAGE -->
+<div class="buyer-page active" id="buyerPage">
+  <section class="hero">
+    <div class="hero-left">
+      <h1>Know Your Car's<br><em>True Value</em><br>Instantly.</h1>
+      <p>India's most accurate used car valuation tool. Powered by ML trained on thousands of real listings.</p>
+      <div class="hero-stats">
+        <div><div class="stat-val">8K+</div><div class="stat-lbl">Listings Trained</div></div>
+        <div><div class="stat-val">83%</div><div class="stat-lbl">Accuracy</div></div>
+        <div><div class="stat-val">Free</div><div class="stat-lbl">Always</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Used Car Price Calculator</div>
+      <div class="form-grid">
+        <div class="form-group"><label>Manufacturing Year</label>
+          <select id="year"><option value="">Select Year</option><script>for(let y=2024;y>=2000;y--) document.write(`<option value="${y}">${y}</option>`)</script></select></div>
+        <div class="form-group"><label>City</label>
+          <select id="city"><option value="">Select City</option><option>Mumbai</option><option>Delhi</option><option>Bangalore</option><option>Chennai</option><option>Hyderabad</option><option>Pune</option><option>Kolkata</option><option>Ahmedabad</option></select></div>
+        <div class="form-group"><label>Car Brand</label>
+          <select id="brand" onchange="updateModels('carmodel','brand')"><option value="">Select Brand</option><option>Maruti Suzuki</option><option>Hyundai</option><option>Honda</option><option>Toyota</option><option>Tata</option><option>Mahindra</option><option>Kia</option><option>Renault</option></select></div>
+        <div class="form-group"><label>Model</label>
+          <select id="carmodel"><option value="">Select Model</option></select></div>
+        <div class="form-group"><label>Fuel Type</label>
+          <select id="fuel"><option value="">Select Fuel</option><option value="Petrol">Petrol</option><option value="Diesel">Diesel</option><option value="CNG">CNG</option><option value="Electric">Electric</option><option value="LPG">LPG</option></select></div>
+        <div class="form-group"><label>Transmission</label>
+          <select id="transmission"><option value="">Select</option><option value="Manual">Manual</option><option value="Automatic">Automatic</option></select></div>
+        <div class="form-group"><label>Seller Type</label>
+          <select id="seller_type"><option value="Individual">Individual</option><option value="Dealer">Dealer</option><option value="Trustmark Dealer">Trustmark Dealer</option></select></div>
+        <div class="form-group full"><label>Kilometers Driven</label>
+          <div class="km-display"><span style="font-size:12px;color:var(--muted)">0 km</span><span class="km-val" id="kmLabel">20,000 km</span><span style="font-size:12px;color:var(--muted)">2,00,000 km</span></div>
+          <input type="range" id="km" min="0" max="200000" step="1000" value="20000" oninput="updateKm(this.value,'kmLabel','km')"></div>
+        <div class="form-group full"><label>Ownership</label>
+          <div class="chip-group" id="ownerChips">
+            <div class="chip active" data-val="First Owner" onclick="setOwner(this,'ownerChips')">1st Owner</div>
+            <div class="chip" data-val="Second Owner" onclick="setOwner(this,'ownerChips')">2nd Owner</div>
+            <div class="chip" data-val="Third Owner" onclick="setOwner(this,'ownerChips')">3rd Owner</div>
+            <div class="chip" data-val="Fourth & Above Owner" onclick="setOwner(this,'ownerChips')">4th+</div>
+          </div></div>
+      </div>
+      <button class="submit-btn buyer-btn" id="submitBtn" onclick="predict()"><span class="btn-text">Check Car Value</span><div class="spinner"></div></button>
+      <div class="error-box" id="errorBox"></div>
+    </div>
+  </section>
+  <section class="result-section" id="resultSection">
+    <div class="result-grid">
+      <div class="price-card">
+        <div class="price-label">Estimated Market Value</div>
+        <div><span style="font-size:22px;color:var(--muted)">₹</span><span class="price-main" id="priceMain">0</span><span style="font-size:18px;color:var(--muted);margin-left:6px">Lakh</span></div>
+        <div class="price-range">
+          <div class="range-item low"><small>Fair Price</small><strong id="priceLow">₹0L</strong></div>
+          <div class="range-divider"><div class="range-line"></div></div>
+          <div class="range-item high"><small>Good Price</small><strong id="priceHigh">₹0L</strong></div>
+        </div>
+        <p class="price-note">Based on ML model trained on real listings. Price may vary ±12% based on condition and local market.</p>
+      </div>
+      <div class="detail-card"><h3>Your Car Details</h3><div id="detailRows"></div></div>
+      <div class="meter-card"><h3>Value Factors</h3>
+        <div class="bar-item"><div class="bar-label"><span>Age</span><span id="ageScore">—</span></div><div class="bar-track"><div class="bar-fill" id="ageBar"></div></div></div>
+        <div class="bar-item"><div class="bar-label"><span>Mileage</span><span id="kmScore">—</span></div><div class="bar-track"><div class="bar-fill" id="kmBar"></div></div></div>
+        <div class="bar-item"><div class="bar-label"><span>Ownership</span><span id="ownerScore">—</span></div><div class="bar-track"><div class="bar-fill" id="ownerBar"></div></div></div>
+        <div class="bar-item"><div class="bar-label"><span>Fuel Type</span><span id="fuelScore">—</span></div><div class="bar-track"><div class="bar-fill" id="fuelBar"></div></div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- SELLER PAGE -->
+<div class="seller-page" id="sellerPage">
+  <div class="seller-dash">
+    <div class="seller-hero-grid">
+      <div class="hero-left">
+        <h1>Get the <em class="seller-em">Best Price</em><br>For Your Car.<br>Sell Smart.</h1>
+        <p>List your car in minutes. Our ML engine calculates the optimal selling price so you never undersell. Reach thousands of verified buyers.</p>
+        <div class="hero-stats">
+          <div><div class="stat-val seller-stat">3 Min</div><div class="stat-lbl">To List</div></div>
+          <div><div class="stat-val seller-stat">₹0</div><div class="stat-lbl">Listing Fee</div></div>
+          <div><div class="stat-val seller-stat">10K+</div><div class="stat-lbl">Active Buyers</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="seller-steps">
+          <div class="step-card" data-n="01"><h3>Describe</h3><p>Fill in your car's details — year, fuel, KMs, condition and extras.</p></div>
+          <div class="step-card" data-n="02"><h3>Price It</h3><p>Our ML model suggests an optimal asking price based on real market data.</p></div>
+          <div class="step-card" data-n="03"><h3>Sell</h3><p>Connect with verified buyers directly. No middlemen, no hidden fees.</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="card seller-card">
+      <div class="card-title">List Your Car & Get Price Estimate</div>
+      <div class="form-grid">
+        <div class="form-group"><label>Manufacturing Year</label>
+          <select id="s_year"><option value="">Select Year</option><script>for(let y=2024;y>=2000;y--) document.write(`<option value="${y}">${y}</option>`)</script></select></div>
+        <div class="form-group"><label>City</label>
+          <select id="s_city"><option value="">Select City</option><option>Mumbai</option><option>Delhi</option><option>Bangalore</option><option>Chennai</option><option>Hyderabad</option><option>Pune</option></select></div>
+        <div class="form-group"><label>Car Brand</label>
+          <select id="s_brand" onchange="updateModels('s_carmodel','s_brand')"><option value="">Select Brand</option><option>Maruti Suzuki</option><option>Hyundai</option><option>Honda</option><option>Toyota</option><option>Tata</option><option>Mahindra</option><option>Kia</option><option>Renault</option></select></div>
+        <div class="form-group"><label>Model</label>
+          <select id="s_carmodel"><option value="">Select Model</option></select></div>
+        <div class="form-group"><label>Fuel Type</label>
+          <select id="s_fuel"><option value="">Select Fuel</option><option value="Petrol">Petrol</option><option value="Diesel">Diesel</option><option value="CNG">CNG</option><option value="Electric">Electric</option></select></div>
+        <div class="form-group"><label>Transmission</label>
+          <select id="s_transmission"><option value="">Select</option><option value="Manual">Manual</option><option value="Automatic">Automatic</option></select></div>
+        <div class="form-group"><label>Your Contact Number</label><input type="text" id="s_phone" placeholder="+91 XXXXX XXXXX"></div>
+        <div class="form-group"><label>Expected Price (₹ Lakh) — optional</label><input type="number" id="s_expected" placeholder="e.g. 4.5" min="0" step="0.1"></div>
+        <div class="form-group full"><label>Kilometers Driven</label>
+          <div class="km-display"><span style="font-size:12px;color:var(--muted)">0 km</span><span class="km-val seller-km" id="sKmLabel">20,000 km</span><span style="font-size:12px;color:var(--muted)">2,00,000 km</span></div>
+          <input type="range" id="s_km" min="0" max="200000" step="1000" value="20000" oninput="updateKmSeller(this.value)"></div>
+        <div class="form-group full"><label>Ownership</label>
+          <div class="chip-group" id="sOwnerChips">
+            <div class="chip active" data-val="First Owner" onclick="setOwner(this,'sOwnerChips')">1st Owner</div>
+            <div class="chip" data-val="Second Owner" onclick="setOwner(this,'sOwnerChips')">2nd Owner</div>
+            <div class="chip" data-val="Third Owner" onclick="setOwner(this,'sOwnerChips')">3rd Owner</div>
+            <div class="chip" data-val="Fourth & Above Owner" onclick="setOwner(this,'sOwnerChips')">4th+</div>
+          </div></div>
+        <div class="form-group full"><label>Car Condition & Extra Details</label>
+          <textarea id="s_desc" placeholder="e.g. Single owner, all service records, new tyres, no accidents, sunroof, reverse camera..."></textarea></div>
+        <div class="form-group full"><label>Upload Car Photos</label>
+          <div class="upload-zone" onclick="document.getElementById('photoInput').click()">
+            <div style="font-size:36px">📸</div>
+            <p id="uploadLabel">Click to upload photos (front, back, interior)</p>
+            <input type="file" id="photoInput" accept="image/*" multiple style="display:none" onchange="handleUpload(this)">
+          </div></div>
+      </div>
+      <button class="submit-btn seller-btn" id="sellerSubmitBtn" onclick="sellerPredict()"><span class="btn-text">Get My Car's Price & List It</span><div class="spinner"></div></button>
+      <div class="error-box" id="sellerErrorBox"></div>
+    </div>
+    <div class="seller-result-section" id="sellerResultSection">
+      <div class="price-estimate-badge" style="max-width:500px;margin:32px auto 0">
+        <div class="est-label">Recommended Selling Price</div>
+        <div class="est-price">₹<span id="sellerPrice">0</span> Lakh</div>
+        <div style="display:flex;justify-content:center;gap:24px;margin-top:12px">
+          <div><small style="color:var(--muted);font-size:11px;display:block">Minimum</small><strong style="color:#ff6b6b" id="sellerLow">₹0L</strong></div>
+          <div><small style="color:var(--muted);font-size:11px;display:block">Maximum</small><strong style="color:var(--accent2)" id="sellerHigh">₹0L</strong></div>
+        </div>
+        <div class="est-note">Set your asking price in this range for fastest sale</div>
+      </div>
+      <div style="text-align:center;margin-top:20px">
+        <button class="submit-btn seller-btn" style="width:auto;padding:14px 40px;display:inline-block">✓ Confirm & Publish Listing</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 2026 TRENDING CARS -->
+<section class="trending-section">
+  <div class="section-header">
+    <div class="section-title"> Top Selling Cars of 2026</div>
+    <div class="section-badge"># Live Sales Data — May 2026</div>
+  </div>
+  <div class="trending-grid" id="trendingGrid"></div>
+
+  <!-- Detail Panel -->
+  <div class="car-detail-panel" id="carDetailPanel">
+    <button class="close-panel-btn" onclick="closeCarPanel()">✕ Close</button>
+    <div class="car-detail-hero">
+      <img id="cdHeroImg" src="" alt="" onerror="this.style.display='none';document.getElementById('cdHeroFallback').style.display='flex'">
+      <div class="img-fallback-big" id="cdHeroFallback" style="display:none"><span id="cdHeroEmoji">🚗</span></div>
+      <div class="hero-gradient"></div>
+      <div class="rank-badge-big" id="cdRankBadge">#1 in India</div>
+      <div class="hero-info-overlay">
+        <h2 id="cdName">Car Name</h2>
+        <p id="cdTagline">Tagline here</p>
+      </div>
+    </div>
+    <div class="car-detail-body">
+      <div class="car-detail-grid">
+        <div>
+          <div class="car-highlights" id="cdHighlights"></div>
+          <div class="spec-grid" id="cdSpecs"></div>
+        </div>
+        <div>
+          <div class="car-price-bar" style="margin-bottom:20px">
+            <div><div class="cp-label">New Price (Ex-showroom)</div><div class="cp-val" id="cdNewPrice">₹0</div></div>
+            <div class="divider-v"></div>
+            <div><div class="cp-label">Used Car Est. Value</div><div class="cp-used" id="cdUsedPrice">₹0</div></div>
+          </div>
+          <div id="cdGallery" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="how-section">
+  <div class="section-title" style="margin-bottom:24px">How CarValue Works</div>
+  <div class="how-grid">
+    <div class="how-card"><div class="how-num">01</div><h3>Enter Car Details</h3><p>Fill in year, brand, model, fuel type, transmission and kilometers driven.</p></div>
+    <div class="how-card"><div class="how-num">02</div><h3>ML Model Analyzes</h3><p>Our Random Forest model trained on real listings computes depreciation instantly.</p></div>
+    <div class="how-card"><div class="how-num">03</div><h3>Get Your Price</h3><p>Receive a fair-to-good price range with transparent factor breakdowns. Free, always.</p></div>
+  </div>
+</section>
+
+<footer>
+  <div class="logo">Car<span>Value</span></div>
+  <p>Powered by ML · Real listing data · Images © Wikimedia Commons (CC-BY-SA) · © 2026 CarValue</p>
+</footer>
+
+<script>
+const carModels = {
+  'Maruti Suzuki':['Dzire','Swift','Fronx','Wagon R','Ertiga','Baleno','Brezza','Celerio'],
+  'Hyundai':['Creta','i20','Grand i10 Nios','Venue','Verna','Alcazar'],
+  'Honda':['City','Amaze','Elevate','WR-V'],
+  'Toyota':['Innova Crysta','Fortuner','Urban Cruiser Hyryder','Glanza','Camry'],
+  'Tata':['Punch','Nexon','Harrier','Tiago','Altroz','Safari','Sierra'],
+  'Mahindra':['Scorpio-N','Thar','XUV700','XUV 3XO','Bolero'],
+  'Kia':['Seltos','Sonet','Carens','Carnival'],
+  'Renault':['Kiger','Triber','Kwid'],
+};
+
+// Real Wikipedia Commons image URLs (CC-BY-SA licensed, free to use)
+const trendingCars = [
+{
+    rank:1,
+    name:'Maruti Suzuki Dzire',
+    img:'images/Maruti Suzuki Dzire.jpg',
+    emoji:'🚗',
+    tagline:"India's #1 selling car · 24,546 units in May 2026 · 36% YoY growth",
+    newPrice:'₹6.79 – 10.15 L',
+    usedPrice:'₹3.5 – 8.5 L',
+    tags:['Sedan','CNG Available','#1 May 2026'],
+    highlights:['36% YoY Growth','33.73 km/kg CNG','5-star GNCAP','Z-Series engine'],
+    specs:[
+      {l:'Engine',v:'1.2L Z-Series'},
+      {l:'Mileage',v:'24.79 kmpl'},
+      {l:'Power',v:'81 bhp'},
+      {l:'Gearbox',v:'Manual / AMT'},
+      {l:'Fuel',v:'Petrol / CNG'},
+      {l:'Units/Month',v:'24,546'}
+    ]
+},
+{
+    rank:2,
+    name:'Maruti Suzuki Fronx',
+    img:'images/Maruti Suzuki Fronx.jpg',
+    emoji:'🚙',
+    tagline:'Coupe-SUV on Baleno platform · 18,829 units/month · 31% growth',
+    newPrice:'₹7.51 – 13.04 L',
+    usedPrice:'₹5 – 11 L',
+    tags:['Coupe-SUV','Turbo Petrol','CNG Available'],
+    highlights:['31% YoY growth','Boosterjet turbo','Wireless CarPlay','Dual airbags std.'],
+    specs:[
+      {l:'Engine',v:'1.2L / 1.0T Boosterjet'},
+      {l:'Mileage',v:'21.79 kmpl'},
+      {l:'Power',v:'99 bhp (turbo)'},
+      {l:'Gearbox',v:'Manual / AMT / DCT'},
+      {l:'Fuel',v:'Petrol / CNG'},
+      {l:'Units/Month',v:'18,829'}
+    ]
+},
+{
+    rank:3,
+    name:'Tata Punch',
+    img:'images/Tata Punch.jpg',
+    emoji:'🚘',
+    tagline:"India's safest micro-SUV · 5-star Global NCAP · EV variant available",
+    newPrice:'₹6.13 – 10.20 L',
+    usedPrice:'₹4 – 8.5 L',
+    tags:['Micro-SUV','5★ GNCAP','EV Available'],
+    highlights:['5-star Global NCAP','High ground clearance','18.97 kmpl ARAI','iRA connected tech'],
+    specs:[
+      {l:'Engine',v:'1.2L Revotron'},
+      {l:'Mileage',v:'18.97 kmpl'},
+      {l:'Power',v:'86 bhp'},
+      {l:'Gearbox',v:'Manual / AMT'},
+      {l:'Fuel',v:'Petrol / CNG / EV'},
+      {l:'Units/Month',v:'19,000'}
+    ]
+},
+{
+    rank:4,
+    name:'Maruti Suzuki Ertiga',
+    img:'images/Maruti Suzuki Ertiga.jpg',
+    emoji:'🚐',
+    tagline:"India's most practical 7-seater · 19,063 units · 21% YoY growth",
+    newPrice:'₹8.69 – 13.13 L',
+    usedPrice:'₹5 – 11 L',
+    tags:['7-Seater MPV','CNG Champion','Best Value'],
+    highlights:['26.11 km/kg CNG','7 comfy seats','Lowest cost/km','21% YoY growth'],
+    specs:[
+      {l:'Engine',v:'1.5L K15C'},
+      {l:'Mileage',v:'20.3 kmpl'},
+      {l:'Power',v:'103 bhp'},
+      {l:'Gearbox',v:'Manual / Automatic'},
+      {l:'Fuel',v:'Petrol / CNG'},
+      {l:'Units/Month',v:'19,063'}
+    ]
+}
+];
+  // Make sure to add an "emoji: '🚗'" property to cars 5, 6, 7, and 8 as well!
+let selectedOwner = 'First Owner';
+let selectedSellerOwner = 'First Owner';
+let activeCarIdx = null;
+
+// INIT
+renderTrendingCars();
+updateKm(20000,'kmLabel','km');
+updateKmSeller(20000);
+
+function switchMode(mode){
+  document.querySelectorAll('.mode-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.buyer-page,.seller-page').forEach(p=>p.classList.remove('active'));
+  if(mode==='buyer'){document.querySelector('.buyer-tab').classList.add('active');document.getElementById('buyerPage').classList.add('active');}
+  else{document.querySelector('.seller-tab').classList.add('active');document.getElementById('sellerPage').classList.add('active');}
+}
+function updateModels(modelId,brandId){
+  const brand=document.getElementById(brandId).value;
+  const sel=document.getElementById(modelId);
+  sel.innerHTML='<option value="">Select Model</option>';
+  (carModels[brand]||[]).forEach(m=>sel.innerHTML+=`<option>${m}</option>`);
+}
+function setOwner(el,groupId){
+  document.querySelectorAll('#'+groupId+' .chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  if(groupId==='ownerChips') selectedOwner=el.dataset.val;
+  else selectedSellerOwner=el.dataset.val;
+}
+function updateKm(v,labelId,sliderId){
+  document.getElementById(labelId).textContent=parseInt(v).toLocaleString('en-IN')+' km';
+  const pct=(v/200000)*100;
+  document.getElementById(sliderId).style.setProperty('--pct',pct+'%');
+}
+function updateKmSeller(v){
+  document.getElementById('sKmLabel').textContent=parseInt(v).toLocaleString('en-IN')+' km';
+  document.getElementById('s_km').style.setProperty('--pct2',(v/200000)*100+'%');
+}
+function handleUpload(input){
+  const n=input.files.length;
+  document.getElementById('uploadLabel').textContent=n>0?`✓ ${n} photo${n>1?'s':''} selected`:'Click to upload photos';
+}
+
+async function predict(){
+  const year=document.getElementById('year').value;
+  const fuel=document.getElementById('fuel').value;
+  const transmission=document.getElementById('transmission').value;
+  const seller_type=document.getElementById('seller_type').value;
+  const km=document.getElementById('km').value;
+  const errorBox=document.getElementById('errorBox');
+  if(!year||!fuel||!transmission){errorBox.textContent='Please fill in Year, Fuel Type and Transmission.';errorBox.classList.add('show');return;}
+  errorBox.classList.remove('show');
+  const btn=document.getElementById('submitBtn');
+  btn.classList.add('loading');
+  try{
+    const res=await fetch('http://127.0.0.1:5000/predict',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({year,km_driven:km,fuel,seller_type,transmission,owner:selectedOwner})});
+    if(!res.ok) throw new Error('Server error '+res.status);
+    const data=await res.json();
+    if(data.error) throw new Error(data.error);
+    showBuyerResult(data,year,km,fuel,transmission,seller_type);
+  }catch(err){
+    errorBox.textContent='❌ '+err.message+' — Make sure Flask is running: cd backend && python main.py';
+    errorBox.classList.add('show');
+  }finally{btn.classList.remove('loading');}
+}
+
+function showBuyerResult(data,year,km,fuel,transmission,seller_type){
+  document.getElementById('priceMain').textContent=data.price_lakh;
+  document.getElementById('priceLow').textContent='₹'+data.range_low+'L';
+  document.getElementById('priceHigh').textContent='₹'+data.range_high+'L';
+  const brand=document.getElementById('brand').value||'—';
+  const model=document.getElementById('carmodel').value||'—';
+  const city=document.getElementById('city').value||'—';
+  document.getElementById('detailRows').innerHTML=[
+    ['Car',`${brand} ${model}`],['Year',year],['City',city],
+    ['Fuel',fuel],['Transmission',transmission],
+    ['KM Driven',parseInt(km).toLocaleString('en-IN')],['Owner',selectedOwner],
+  ].map(([k,v])=>`<div class="detail-row"><span>${k}</span><span>${v}</span></div>`).join('');
+  const age=2026-parseInt(year);
+  const ageScore=Math.max(0,Math.round(100-age*7));
+  const kmScore=Math.round(Math.max(0,100-(parseInt(km)/200000)*100));
+  const ownerIdx=['First Owner','Second Owner','Third Owner','Fourth & Above Owner'].indexOf(selectedOwner);
+  const ownerScore=Math.round(100-Math.max(0,ownerIdx)*25);
+  const fuelScore=fuel==='Electric'?95:fuel==='Diesel'?80:fuel==='Petrol'?70:60;
+  ['age','km','owner','fuel'].forEach((k,i)=>{
+    const scores=[ageScore,kmScore,ownerScore,fuelScore];
+    document.getElementById(k+'Score').textContent=scores[i]+'%';
+  });
+  setTimeout(()=>{
+    document.getElementById('ageBar').style.width=ageScore+'%';
+    document.getElementById('kmBar').style.width=kmScore+'%';
+    document.getElementById('ownerBar').style.width=ownerScore+'%';
+    document.getElementById('fuelBar').style.width=fuelScore+'%';
+  },100);
+  const sec=document.getElementById('resultSection');
+  sec.classList.add('show');
+  sec.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+async function sellerPredict(){
+  const year=document.getElementById('s_year').value;
+  const fuel=document.getElementById('s_fuel').value;
+  const transmission=document.getElementById('s_transmission').value;
+  const km=document.getElementById('s_km').value;
+  const errorBox=document.getElementById('sellerErrorBox');
+  if(!year||!fuel||!transmission){errorBox.textContent='Please fill in Year, Fuel Type and Transmission.';errorBox.classList.add('show');return;}
+  errorBox.classList.remove('show');
+  const btn=document.getElementById('sellerSubmitBtn');
+  btn.classList.add('loading');
+  try{
+    const res=await fetch('http://127.0.0.1:5000/predict',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({year,km_driven:km,fuel,seller_type:'Individual',transmission,owner:selectedSellerOwner})});
+    if(!res.ok) throw new Error('Server error '+res.status);
+    const data=await res.json();
+    if(data.error) throw new Error(data.error);
+    document.getElementById('sellerPrice').textContent=data.price_lakh;
+    document.getElementById('sellerLow').textContent='₹'+data.range_low+'L';
+    document.getElementById('sellerHigh').textContent='₹'+data.range_high+'L';
+    const sec=document.getElementById('sellerResultSection');
+    sec.classList.add('show');
+    sec.scrollIntoView({behavior:'smooth',block:'start'});
+  }catch(err){
+    errorBox.textContent='❌ '+err.message+' — Make sure Flask is running on port 5000.';
+    errorBox.classList.add('show');
+  }finally{btn.classList.remove('loading');}
+}
+
+// TRENDING CARS
+function renderTrendingCars(){
+  document.getElementById('trendingGrid').innerHTML=trendingCars.map((c,i)=>`
+    <div class="trend-card" id="tcard${i}" onclick="openCarPanel(${i})">
+      <div class="trend-img-wrap">
+        <img src="${c.img}" alt="${c.name}"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="img-fallback" style="display:none">${c.emoji}</div>
+        <div class="trend-rank">#${c.rank}</div>
+        <div class="trend-units">${c.specs[5].v}</div>
+      </div>
+      <div class="trend-body">
+        <div class="trend-name">${c.name}</div>
+        <div class="trend-price">${c.newPrice}</div>
+        <div class="trend-meta">${c.tags.map(t=>`<span class="trend-tag">${t}</span>`).join('')}</div>
+      </div>
+    </div>`).join('');
+}
+
+function openCarPanel(idx){
+  if(activeCarIdx===idx){closeCarPanel();return;}
+  activeCarIdx=idx;
+  const c=trendingCars[idx];
+  document.querySelectorAll('.trend-card').forEach(t=>t.classList.remove('selected'));
+  document.getElementById('tcard'+idx).classList.add('selected');
+  // Hero image
+  const heroImg=document.getElementById('cdHeroImg');
+  const heroFallback=document.getElementById('cdHeroFallback');
+  heroImg.style.display='block';
+  heroFallback.style.display='none';
+  heroImg.src=c.img;
+  heroImg.alt=c.name;
+  heroImg.onerror=function(){this.style.display='none';heroFallback.style.display='flex';};
+  document.getElementById('cdHeroEmoji').textContent=c.emoji;
+  document.getElementById('cdRankBadge').textContent='#'+c.rank+' in India 2026';
+  document.getElementById('cdName').textContent=c.name;
+  document.getElementById('cdTagline').textContent=c.tagline;
+  document.getElementById('cdHighlights').innerHTML=c.highlights.map(h=>`<span class="highlight-tag">✓ ${h}</span>`).join('');
+  document.getElementById('cdSpecs').innerHTML=c.specs.map(s=>`
+    <div class="spec-item"><div class="spec-label">${s.l}</div><div class="spec-val">${s.v}</div></div>`).join('');
+  document.getElementById('cdNewPrice').textContent=c.newPrice;
+  document.getElementById('cdUsedPrice').textContent=c.usedPrice;
+  const panel=document.getElementById('carDetailPanel');
+  panel.classList.add('show');
+  setTimeout(()=>panel.scrollIntoView({behavior:'smooth',block:'start'}),50);
+}
+
+function closeCarPanel(){
+  document.getElementById('carDetailPanel').classList.remove('show');
+  document.querySelectorAll('.trend-card').forEach(t=>t.classList.remove('selected'));
+  activeCarIdx=null;
+}
+</script>
+</body>
+</html>
