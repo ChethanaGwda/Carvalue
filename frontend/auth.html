@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarValue — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0f14;--surface:#161921;--card:#1c2030;--border:#2a2f42;
+  --accent:#e8ff47;--accent2:#4affb4;--text:#f0f2ff;--muted:#6b7194;
+}
+html{height:100%}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'DM Sans',sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;
+  overflow-x:hidden;
+}
+
+/* ── NAV ── */
+nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 40px;border-bottom:1px solid var(--border);
+  background:rgba(13,15,20,0.92);backdrop-filter:blur(14px);
+}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:22px;letter-spacing:-0.5px;text-decoration:none;color:var(--text)}
+.logo span{color:var(--accent)}
+
+/* ── BACKGROUND GRID ── */
+.bg-grid{
+  position:fixed;inset:0;z-index:0;
+  background-image:
+    linear-gradient(rgba(232,255,71,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(232,255,71,0.03) 1px,transparent 1px);
+  background-size:48px 48px;
+  pointer-events:none;
+}
+.bg-glow{
+  position:fixed;top:-120px;right:-80px;width:560px;height:560px;
+  background:radial-gradient(circle,rgba(232,255,71,0.07) 0%,transparent 65%);
+  pointer-events:none;z-index:0;
+}
+.bg-glow2{
+  position:fixed;bottom:-100px;left:-80px;width:400px;height:400px;
+  background:radial-gradient(circle,rgba(74,255,180,0.05) 0%,transparent 65%);
+  pointer-events:none;z-index:0;
+}
+
+/* ── MAIN LAYOUT ── */
+main{
+  flex:1;display:grid;grid-template-columns:1fr 1fr;
+  max-width:1100px;width:100%;margin:0 auto;
+  padding:60px 40px;gap:80px;align-items:center;
+  position:relative;z-index:1;
+}
+
+/* ── LEFT PANEL ── */
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(232,255,71,0.08);border:1px solid rgba(232,255,71,0.2);
+  border-radius:20px;padding:5px 14px;
+  font-size:12px;color:var(--accent);font-weight:600;letter-spacing:.4px;
+  margin-bottom:28px;
+}
+.eyebrow::before{content:'';width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+.left-panel h1{
+  font-family:'Syne',sans-serif;font-weight:800;
+  font-size:clamp(32px,3.8vw,50px);
+  line-height:1.07;letter-spacing:-1px;
+  margin-bottom:20px;
+}
+.left-panel h1 em{color:var(--accent);font-style:normal}
+.left-panel p{
+  color:var(--muted);font-size:15px;line-height:1.75;
+  max-width:400px;margin-bottom:40px;
+}
+
+.feature-list{display:flex;flex-direction:column;gap:14px}
+.feature-item{
+  display:flex;align-items:center;gap:14px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:14px 16px;
+  transition:border-color .2s;
+}
+.feature-item:hover{border-color:rgba(232,255,71,0.25)}
+.fi-icon{
+  width:36px;height:36px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;
+}
+.fi-icon.green{background:rgba(74,255,180,0.1)}
+.fi-icon.yellow{background:rgba(232,255,71,0.1)}
+.fi-icon.blue{background:rgba(100,149,255,0.1)}
+.fi-text strong{display:block;font-size:13px;font-weight:600;margin-bottom:2px}
+.fi-text span{font-size:12px;color:var(--muted)}
+
+/* ── RIGHT PANEL / CARD ── */
+.auth-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:24px;padding:40px;position:relative;overflow:hidden;
+}
+.auth-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2.5px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+
+.auth-header{text-align:center;margin-bottom:32px}
+.auth-logo{
+  font-family:'Syne',sans-serif;font-weight:800;font-size:26px;
+  letter-spacing:-0.5px;margin-bottom:10px;
+}
+.auth-logo span{color:var(--accent)}
+.auth-header h2{
+  font-family:'Syne',sans-serif;font-weight:700;font-size:20px;
+  margin-bottom:8px;
+}
+.auth-header p{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* ── GOOGLE BUTTON ── */
+.google-btn{
+  width:100%;display:flex;align-items:center;justify-content:center;
+  gap:12px;padding:15px 20px;
+  background:var(--text);color:#0d0f14;
+  border:none;border-radius:12px;cursor:pointer;
+  font-family:'DM Sans',sans-serif;font-weight:600;font-size:15px;
+  transition:all .2s;position:relative;overflow:hidden;
+  margin-bottom:28px;
+}
+.google-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(240,242,255,0.15)}
+.google-btn:active{transform:translateY(0)}
+.google-btn .google-icon{width:20px;height:20px;flex-shrink:0}
+
+/* ── LOADING STATE ── */
+.google-btn.loading{pointer-events:none;opacity:.85}
+.google-btn.loading .btn-label{opacity:0}
+.spinner{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:20px;height:20px;
+  border:2px solid rgba(13,15,20,0.2);
+  border-top-color:#0d0f14;
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+  display:none;
+}
+.google-btn.loading .spinner{display:block}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+
+/* ── ERROR STATE ── */
+.error-msg{
+  display:none;
+  background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.25);
+  border-radius:10px;padding:12px 16px;
+  font-size:13px;color:#ff7070;
+  margin-bottom:16px;text-align:center;
+}
+.error-msg.show{display:block}
+
+/* ── SUCCESS STATE ── */
+.success-overlay{
+  display:none;
+  flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:20px 0;
+  animation:fadeUp .4s ease;
+}
+.success-overlay.show{display:flex}
+.success-check{
+  width:56px;height:56px;border-radius:50%;
+  background:rgba(232,255,71,0.12);border:2px solid var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;margin-bottom:16px;
+  animation:pop .4s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.success-overlay h3{font-family:'Syne',sans-serif;font-weight:700;font-size:18px;margin-bottom:6px}
+.success-overlay p{font-size:13px;color:var(--muted);margin-bottom:24px}
+.continue-btn{
+  padding:13px 36px;background:var(--accent);color:#0d0f14;
+  border:none;border-radius:10px;cursor:pointer;
+  font-family:'Syne',sans-serif;font-weight:700;font-size:15px;
+  transition:all .2s;text-decoration:none;display:inline-block;
+}
+.continue-btn:hover{opacity:.9;transform:translateY(-1px)}
+
+.divider{
+  display:flex;align-items:center;gap:14px;
+  margin-bottom:20px;
+}
+.divider span{font-size:12px;color:var(--muted);white-space:nowrap}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.terms{
+  font-size:11px;color:var(--muted);text-align:center;line-height:1.6;
+  margin-top:24px;
+}
+.terms a{color:var(--muted);text-decoration:underline;text-underline-offset:2px}
+
+/* ── TRUST ROW ── */
+.trust-row{
+  display:flex;justify-content:center;gap:24px;
+  padding-top:20px;border-top:1px solid var(--border);
+  margin-top:24px;
+}
+.trust-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.trust-dot{width:5px;height:5px;border-radius:50%;background:var(--accent2)}
+
+/* ── MOCK SOCIAL PROOF ── */
+.social-proof{
+  display:flex;align-items:center;gap:12px;
+  margin-top:32px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:14px 16px;
+}
+.avatar-stack{display:flex}
+.avatar{
+  width:28px;height:28px;border-radius:50%;
+  border:2px solid var(--card);margin-left:-8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;
+}
+.avatar:first-child{margin-left:0}
+.av1{background:linear-gradient(135deg,#e8ff47,#4affb4);color:#0d0f14}
+.av2{background:linear-gradient(135deg,#4affb4,#4695ff);color:#0d0f14}
+.av3{background:linear-gradient(135deg,#ff6f3c,#e8ff47);color:#0d0f14}
+.sp-text{font-size:12px;color:var(--muted);line-height:1.4}
+.sp-text strong{color:var(--text);font-weight:600}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:800px){
+  main{grid-template-columns:1fr;gap:40px;padding:36px 20px}
+  .left-panel{display:none}
+}
+@media(max-width:480px){
+  nav{padding:16px 20px}
+  .auth-card{padding:28px 22px}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+<div class="bg-glow2"></div>
+
+<nav>
+  <a class="logo" href="#">Car<span>Value</span></a>
+</nav>
+
+<main>
+  <!-- LEFT: value prop -->
+  <div class="left-panel">
+    <div class="eyebrow">ML-Powered · Free Forever</div>
+    <h1>Know Your Car's<br><em>True Value</em><br>in Seconds.</h1>
+    <p>India's most accurate used car valuation tool. Trained on 8,000+ real listings — get a fair price estimate whether you're buying or selling.</p>
+
+    <div class="feature-list">
+      <div class="feature-item">
+        <div class="fi-icon yellow">📊</div>
+        <div class="fi-text">
+          <strong>Instant Valuation</strong>
+          <span>ML model trained on real listings across 8 cities</span>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="fi-icon green">🛡️</div>
+        <div class="fi-text">
+          <strong>Buyer & Seller Tools</strong>
+          <span>Check fair price or list your car — all in one place</span>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="fi-icon blue">🔒</div>
+        <div class="fi-text">
+          <strong>Private & Secure</strong>
+          <span>Your data is never sold or shared with third parties</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="social-proof">
+      <div class="avatar-stack">
+        <div class="avatar av1">R</div>
+        <div class="avatar av2">P</div>
+        <div class="avatar av3">S</div>
+      </div>
+      <div class="sp-text"><strong>2,400+ users</strong> valued their car this month</div>
+    </div>
+  </div>
+
+  <!-- RIGHT: auth card -->
+  <div class="auth-card">
+    <div id="authContent">
+      <div class="auth-header">
+        <div class="auth-logo">Car<span>Value</span></div>
+        <h2>Welcome back</h2>
+        <p>Sign in to save valuations, track prices, and manage your listings.</p>
+      </div>
+
+      <!-- Error message (shown on failure) -->
+      <div class="error-msg" id="errorMsg"></div>
+
+      <button class="google-btn" id="googleBtn" onclick="handleGoogleSignIn()">
+        <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        <span class="btn-label">Continue with Google</span>
+        <div class="spinner"></div>
+      </button>
+
+      <div class="divider"><span>what you get</span></div>
+
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:4px">
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)">
+          <span style="color:var(--accent);font-size:15px">✓</span> Save and revisit past valuations
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)">
+          <span style="color:var(--accent);font-size:15px">✓</span> Publish and manage car listings
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)">
+          <span style="color:var(--accent);font-size:15px">✓</span> Price drop alerts for your shortlist
+        </div>
+      </div>
+
+      <div class="trust-row">
+        <div class="trust-item"><div class="trust-dot"></div>No spam</div>
+        <div class="trust-item"><div class="trust-dot"></div>Free forever</div>
+        <div class="trust-item"><div class="trust-dot"></div>Cancel anytime</div>
+      </div>
+
+      <p class="terms">
+        By continuing, you agree to CarValue's
+        <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+      </p>
+    </div>
+
+    <!-- SUCCESS STATE -->
+    <div class="success-overlay" id="successOverlay">
+      <div class="success-check">✓</div>
+      <h3>You're signed in!</h3>
+      <p id="successName">Welcome to CarValue. Your account is ready.</p>
+      <a href="index.html" class="continue-btn">Go to CarValue →</a>
+    </div>
+  </div>
+</main>
+
+<!-- Firebase SDK (module) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  // ── Your Firebase config ──
+  const firebaseConfig = {
+    apiKey: "AIzaSyA81gsZ2bKBbKk9J93HTCqahU1cgpYfmIQ",
+    authDomain: "carprice-8e0d1.firebaseapp.com",
+    projectId: "carprice-8e0d1",
+    storageBucket: "carprice-8e0d1.firebasestorage.app",
+    messagingSenderId: "339796601444",
+    appId: "1:339796601444:web:8932e1812f667acf088d71",
+    measurementId: "G-1BE4F5H4VB"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  // ── Sign-in handler (exposed to global scope) ──
+  window.handleGoogleSignIn = async function () {
+    const btn = document.getElementById('googleBtn');
+    const errorMsg = document.getElementById('errorMsg');
+
+    // Reset error
+    errorMsg.classList.remove('show');
+    errorMsg.textContent = '';
+    btn.classList.add('loading');
+
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      // Success!
+      btn.classList.remove('loading');
+      document.getElementById('authContent').style.display = 'none';
+      const overlay = document.getElementById('successOverlay');
+      overlay.classList.add('show');
+      document.getElementById('successName').textContent =
+        `Signed in as ${user.displayName}. Taking you to CarValue…`;
+
+      // Redirect after 2 seconds
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 2000);
+
+    } catch (error) {
+      btn.classList.remove('loading');
+
+      // Show human-friendly error
+      let message = 'Sign-in failed. Please try again.';
+      if (error.code === 'auth/popup-closed-by-user') {
+        message = 'Sign-in cancelled. Please try again.';
+      } else if (error.code === 'auth/popup-blocked') {
+        message = 'Popup was blocked by your browser. Please allow popups for this site.';
+      } else if (error.code === 'auth/network-request-failed') {
+        message = 'Network error. Check your internet connection.';
+      }
+
+      errorMsg.textContent = message;
+      errorMsg.classList.add('show');
+    }
+  };
+</script>
+
+</body>
+</html>
